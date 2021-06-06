@@ -7,3 +7,5 @@
 * `mvn clean package`
 * `java -jar target/jike-cli.jar`
 
+#### 截图
+![screenshots-1](imgs/jike-cli-1.png)
