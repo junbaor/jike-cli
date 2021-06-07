@@ -6,7 +6,7 @@
 
     <groupId>com.github.junbaor</groupId>
     <artifactId>jike-cli</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -65,12 +65,12 @@
             <artifactId>JColor</artifactId>
             <version>5.0.1</version>
         </dependency>
-        <!--<dependency>
+        <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
             <version>4.6.1</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.ocpsoft.prettytime</groupId>
             <artifactId>prettytime</artifactId>
             <version>3.2.7.Final</version>
@@ -78,7 +78,7 @@
     </dependencies>
 
     <build>
-        <finalName>jike-cli-base</finalName>
+        <finalName>jike-cli</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

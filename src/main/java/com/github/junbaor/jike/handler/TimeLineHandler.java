@@ -33,6 +33,7 @@ public class TimeLineHandler {
             } else if (Objects.equals(next, "q")
                     || Objects.equals(next, "quit")
                     || Objects.equals(next, "exit")) {
+                System.out.println("ヾ(￣▽￣)Bye~Bye~");
                 return;
             } else if (Objects.equals(next, "h")) {
                 int padSize = 1;
@@ -40,11 +41,11 @@ public class TimeLineHandler {
                 System.out.println("<" + StringUtils.pad("j", padSize, padStr) + "> 下一页");
                 System.out.println("<" + StringUtils.pad("r", padSize, padStr) + "> 刷新");
                 System.out.println("<" + StringUtils.pad("h", padSize, padStr) + "> 帮助");
-                System.out.println("<" + StringUtils.pad("q", padSize, padStr) + "> 返回上一级别");
+                System.out.println("<" + StringUtils.pad("q", padSize, padStr) + "> 退出");
             } else {
                 System.out.println("无效命令");
             }
-            System.out.print("[-] 输入信息流命令(h显示帮助)> ");
+            System.out.print("[-] 输入信息流命令 (h 显示帮助) > ");
             next = App.scanner.next();
         }
     }
@@ -97,7 +98,7 @@ public class TimeLineHandler {
                     sb.append(item.getAction()).append("不受支持");
                 }
             } else {
-                sb.append(item.getType()).append("不受支持");
+                sb.append(item.getType()).append(" 类型的消息暂时不支持显示");
             }
 
             Date createdAt = item.getCreatedAt();
