@@ -1,6 +1,6 @@
 package com.github.junbaor.jike.data;
 
-import com.github.junbaor.jike.Config;
+import com.github.junbaor.jike.common.Config;
 import com.github.junbaor.jike.exceptions.NoLoginException;
 import com.github.junbaor.jike.exceptions.SmsCodeErrorException;
 import com.github.junbaor.jike.exceptions.UnauthorizedException;

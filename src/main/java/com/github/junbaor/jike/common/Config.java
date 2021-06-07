@@ -1,4 +1,4 @@
-package com.github.junbaor.jike;
+package com.github.junbaor.jike.common;
 
 import lombok.extern.slf4j.Slf4j;
 
