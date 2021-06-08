@@ -6,9 +6,14 @@
 
 Mac 环境如果有 Homebrew 就很简单
 
+安装
 ```
 brew install junbaor/brew/jike-cli
 ```
+更新
+```
+brew update && brew upgrade jike-cli
+``` 
 
 #### 命令规划
 
@@ -23,7 +28,7 @@ jike-cli notice      显示系统通知 (待实现)
 jike-cli following   交互式显示关注列表
 jike-cli follower    交互式显示被关注列表
 jike-cli -h          显示帮助信息
-jike-cli -V          显示版本号
+jike-cli -v          显示版本号
 jike-cli -n          发表动态
 ```
 
