@@ -68,7 +68,7 @@ public class HomeCmd implements Callable<Integer> {
                 System.out.println("<" + StringUtils.pad("r", padSize, padStr) + "> 刷新");
                 System.out.println("<" + StringUtils.pad("h", padSize, padStr) + "> 帮助");
                 System.out.println("<" + StringUtils.pad("q", padSize, padStr) + "> 退出");
-                System.out.println("<" + StringUtils.pad("c 序号 评论内容", padSize, padStr) + "> 查看作者动态");
+                System.out.println("<" + StringUtils.pad("c 序号 评论内容", padSize, padStr) + "> 评论");
                 System.out.println("<" + StringUtils.pad("nb 序号", padSize, padStr) + "> 点赞");
                 System.out.println("<" + StringUtils.pad("lj 序号", padSize, padStr) + "> 取消点赞");
             } else if (next.startsWith("c ")) {

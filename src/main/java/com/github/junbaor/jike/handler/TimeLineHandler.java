@@ -45,7 +45,7 @@ public class TimeLineHandler {
                 System.out.println("<" + StringUtils.pad("h", padSize, padStr) + "> 帮助");
                 System.out.println("<" + StringUtils.pad("q", padSize, padStr) + "> 退出");
                 System.out.println("<" + StringUtils.pad("g", padSize, padStr) + "> 查看作者动态");
-                System.out.println("<" + StringUtils.pad("c 序号 评论内容", padSize, padStr) + "> 查看作者动态");
+                System.out.println("<" + StringUtils.pad("c 序号 评论内容", padSize, padStr) + "> 评论");
 //                System.out.println("<" + StringUtils.pad("f 序号", padSize, padStr) + "> 关注作者");
 //                System.out.println("<" + StringUtils.pad("u 序号", padSize, padStr) + "> 取关作者");
                 System.out.println("<" + StringUtils.pad("nb 序号", padSize, padStr) + "> 点赞");
