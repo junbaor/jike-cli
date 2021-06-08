@@ -18,19 +18,25 @@ import java.util.concurrent.Callable;
                 LoginCmd.class,
                 LogoutCmd.class,
                 MeCmd.class,
+                HomeCmd.class,
                 MessageCmd.class,
                 FollowingCmd.class,
                 FollowerCmd.class,
                 NewCmd.class
         },
         description = "即刻命令行客户端",
-        versionProvider = VersionProvider.class,
-        mixinStandardHelpOptions = true
+        versionProvider = VersionProvider.class
 )
 public class App implements Callable<Integer> {
 
     public static final JikeClient jikeClient = new JikeClient();
     public static final Scanner scanner = new Scanner(System.in);
+
+    @CommandLine.Option(names = {"-v", "-version"}, versionHelp = true, description = "打印版本号")
+    boolean version;
+
+    @CommandLine.Option(names = {"-h", "-help"}, usageHelp = true, description = "打印帮助信息")
+    boolean help;
 
     @Override
     public Integer call() {

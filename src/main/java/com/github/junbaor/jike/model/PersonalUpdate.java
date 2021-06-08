@@ -3,6 +3,7 @@ package com.github.junbaor.jike.model;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 import java.util.List;
 
 @NoArgsConstructor
@@ -10,7 +11,8 @@ import java.util.List;
 public class PersonalUpdate {
 
     private boolean success;
-    private List<DataBean> data;
+    //    private List<DataBean> data;
+    private List<FollowingUpdates.DataBean> data;
     private LoadMoreKeyBean loadMoreKey;
 
     @NoArgsConstructor
@@ -29,7 +31,7 @@ public class PersonalUpdate {
         private List<?> urlsInText;
         private String status;
         private boolean isCommentForbidden;
-        private boolean liked;
+        private Boolean liked;
         private int likeCount;
         private int commentCount;
         private int repostCount;
@@ -40,7 +42,7 @@ public class PersonalUpdate {
         private boolean collected;
         private Object collectTime;
         private UserBean user;
-        private String createdAt;
+        private Date createdAt;
         private boolean isFeatured;
         private boolean enablePictureComments;
         private RolloutsBean rollouts;

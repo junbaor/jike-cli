@@ -1,35 +1,55 @@
-package com.github.junbaor.jike.handler;
+package com.github.junbaor.jike.cmd;
 
 import com.github.junbaor.jike.App;
 import com.github.junbaor.jike.common.AppConstant;
+import com.github.junbaor.jike.exceptions.NoLoginException;
+import com.github.junbaor.jike.handler.ActionHandler;
 import com.github.junbaor.jike.model.FollowingUpdates;
+import com.github.junbaor.jike.model.PersonalUpdate;
 import com.github.junbaor.jike.util.StringUtils;
+import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import picocli.CommandLine;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.concurrent.Callable;
 
-import static com.diogonunes.jcolor.Attribute.*;
+import static com.diogonunes.jcolor.Attribute.BLUE_TEXT;
+import static com.diogonunes.jcolor.Attribute.CYAN_TEXT;
 
-public class TimeLineHandler {
+@NoArgsConstructor
+@CommandLine.Command(name = "home", description = "显示个人动态")
+public class HomeCmd implements Callable<Integer> {
 
-    private FollowingUpdates.LoadMoreKeyBean moreKeyBean = null;
-    private List<FollowingUpdates.DataBean> dataList = Collections.emptyList();
+    private String userName;
 
-    public void handler() throws Exception {
+    public HomeCmd(String userName) {
+        this.userName = userName;
+    }
+
+    @Override
+    public Integer call() throws Exception {
+        homeHandler();
+        return AppConstant.CODE_SUCCESS;
+    }
+
+    private void homeHandler() throws IOException, NoLoginException {
+        PersonalUpdate.LoadMoreKeyBean loadMoreKey = null;
+        List<FollowingUpdates.DataBean> dataList = Collections.emptyList();
         String next = "";
         while (true) {
             if (StringUtils.isBlank(next) || Objects.equals(next, "j")) {
-                FollowingUpdates followingUpdates = App.jikeClient.followingUpdates(10, moreKeyBean);
-                printFollowingUpdates(followingUpdates);
-                dataList = followingUpdates.getData();
-                moreKeyBean = followingUpdates.getLoadMoreKey();
+                PersonalUpdate single = App.jikeClient.single(userName, loadMoreKey);
+                printPersonalUpdate(single);
+                dataList = single.getData();
+                loadMoreKey = single.getLoadMoreKey();
             } else if (Objects.equals(next, "r")) {
-                moreKeyBean = null;
+                loadMoreKey = null;
                 next = "j";
                 continue;
             } else if (Objects.equals(next, "q")
@@ -37,6 +57,10 @@ public class TimeLineHandler {
                     || Objects.equals(next, "exit")) {
                 System.out.println("ヾ(￣▽￣)Bye~Bye~");
                 return;
+            } else if (next.startsWith("nb ")) { // 点赞
+                ActionHandler.like(next, dataList);
+            } else if (next.startsWith("lj ")) { // 点赞
+                ActionHandler.unLike(next, dataList);
             } else if (Objects.equals(next, "h")) {
                 int padSize = 1;
                 String padStr = " ";
@@ -44,24 +68,11 @@ public class TimeLineHandler {
                 System.out.println("<" + StringUtils.pad("r", padSize, padStr) + "> 刷新");
                 System.out.println("<" + StringUtils.pad("h", padSize, padStr) + "> 帮助");
                 System.out.println("<" + StringUtils.pad("q", padSize, padStr) + "> 退出");
-                System.out.println("<" + StringUtils.pad("g", padSize, padStr) + "> 查看作者动态");
                 System.out.println("<" + StringUtils.pad("c 序号 评论内容", padSize, padStr) + "> 查看作者动态");
-//                System.out.println("<" + StringUtils.pad("f 序号", padSize, padStr) + "> 关注作者");
-//                System.out.println("<" + StringUtils.pad("u 序号", padSize, padStr) + "> 取关作者");
                 System.out.println("<" + StringUtils.pad("nb 序号", padSize, padStr) + "> 点赞");
                 System.out.println("<" + StringUtils.pad("lj 序号", padSize, padStr) + "> 取消点赞");
-            } else if (next.startsWith("g ")) { // 显示作者动态
-                ActionHandler.goAuthorHome(next, dataList);
-            } else if (next.startsWith("c ")) { // 评论 FIXME 正则匹配
+            } else if (next.startsWith("c ")) {
                 ActionHandler.comment(next, dataList);
-            } else if (next.startsWith("f ")) { // 关注
-
-            } else if (next.startsWith("u ")) { // 取消关注
-
-            } else if (next.startsWith("nb ")) { // 点赞
-                ActionHandler.like(next, dataList);
-            } else if (next.startsWith("lj ")) { // 点赞
-                ActionHandler.unLike(next, dataList);
             } else {
                 System.out.println("无效命令");
             }
@@ -70,9 +81,9 @@ public class TimeLineHandler {
         }
     }
 
-    private void printFollowingUpdates(FollowingUpdates followingUpdates) {
+    private void printPersonalUpdate(PersonalUpdate single) {
         int i = 1;
-        for (FollowingUpdates.DataBean item : followingUpdates.getData()) {
+        for (FollowingUpdates.DataBean item : single.getData()) {
             StringBuilder sb = new StringBuilder();
             String index = i + "";
             sb.append("[").append(index).append("] ");
@@ -99,26 +110,6 @@ public class TimeLineHandler {
                 }
                 if (item.getPoi() != null) {
                     sb.append(" [").append(StringUtils.pad(item.getPoi().getName())).append("]");
-                }
-            } else if (Objects.equals(item.getType(), "PERSONAL_UPDATE")) {
-                // LIVE_SHARE USER_FOLLOW
-                if (Objects.equals(item.getAction(), "LIVE_SHARE")) {
-                    String title = item.getLive().getTitle(); // 直播间名
-                    String verb = item.getVerb(); // 直播已结束
-//                    String screenName = item.getUser().getScreenName();
-//                    sb.append("")
-                } else if (Objects.equals(item.getAction(), "USER_FOLLOW")) {
-                    String collect = item.getUsers().stream().map(FollowingUpdates.DataBean.UsersBean::getScreenName).collect(Collectors.joining("、"));
-                    sb.append("[").append(StringUtils.pad(collect)).append("]");
-                    sb.append("关注了");
-                    for (FollowingUpdates.DataBean.TargetUsersBean targetUser : item.getTargetUsers()) {
-                        String screenName1 = targetUser.getScreenName();
-                        String briefIntro = targetUser.getBriefIntro().replace("\n", "↴");
-                        sb.append("[").append(StringUtils.pad(screenName1, YELLOW_TEXT()))
-                                .append(StringUtils.pad("(" + briefIntro + ")", CYAN_TEXT())).append("]");
-                    }
-                } else {
-                    sb.append(item.getAction()).append("不受支持");
                 }
             } else {
                 sb.append(item.getType()).append(" 类型的消息暂时不支持显示");

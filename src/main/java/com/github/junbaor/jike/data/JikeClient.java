@@ -3,14 +3,11 @@ package com.github.junbaor.jike.data;
 import com.github.junbaor.jike.exceptions.NoLoginException;
 import com.github.junbaor.jike.exceptions.SmsCodeErrorException;
 import com.github.junbaor.jike.exceptions.UnauthorizedException;
-import com.github.junbaor.jike.model.FollowingUpdates;
-import com.github.junbaor.jike.model.PersonalUpdate;
-import com.github.junbaor.jike.model.Profile;
-import com.github.junbaor.jike.model.SendSms;
+import com.github.junbaor.jike.model.*;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.function.Supplier;
 
 @Slf4j
 public class JikeClient {
@@ -36,12 +33,13 @@ public class JikeClient {
         }
     }
 
-    public PersonalUpdate personalUpdate() throws NoLoginException {
+    public PersonalUpdate single(String userName, PersonalUpdate.LoadMoreKeyBean loadMoreKeyBean)
+            throws NoLoginException, IOException {
         try {
-            return proxy.personalUpdate();
+            return proxy.single(userName, loadMoreKeyBean);
         } catch (UnauthorizedException e1) {
             proxy.refreshToken();
-            return proxy.personalUpdate();
+            return proxy.single(userName, loadMoreKeyBean);
         }
     }
 
@@ -53,12 +51,66 @@ public class JikeClient {
         proxy.smsCodeLogin(areaCode, mobile, smsCode);
     }
 
-    public <T> T exec(Supplier<T> supplier) throws NoLoginException {
+    public CreatePostsRep createPosts(String content) throws NoLoginException, IOException {
         try {
-            return supplier.get();
-        } catch (UnauthorizedException e) {
+            return proxy.createPosts(content);
+        } catch (UnauthorizedException e1) {
             proxy.refreshToken();
-            return supplier.get();
+            return proxy.createPosts(content);
+        }
+    }
+
+    public String uploadToken(File file) throws NoLoginException, IOException {
+        try {
+            return proxy.uploadToken(file);
+        } catch (UnauthorizedException e1) {
+            proxy.refreshToken();
+            return proxy.uploadToken(file);
+        }
+    }
+
+    public boolean like(String id) throws NoLoginException, IOException {
+        try {
+            return proxy.like(id);
+        } catch (UnauthorizedException e1) {
+            proxy.refreshToken();
+            return proxy.like(id);
+        }
+    }
+
+    public boolean unLike(String id) throws NoLoginException, IOException {
+        try {
+            return proxy.unLike(id);
+        } catch (UnauthorizedException e1) {
+            proxy.refreshToken();
+            return proxy.unLike(id);
+        }
+    }
+
+    public AddCommentsRep addComments(String id, String content) throws IOException, NoLoginException {
+        try {
+            return proxy.addComments(id, content);
+        } catch (UnauthorizedException e1) {
+            proxy.refreshToken();
+            return proxy.addComments(id, content);
+        }
+    }
+
+    public FollowingRep getFollowingList(FollowingRep.LoadMoreKeyBean loadMoreKey) throws IOException, NoLoginException {
+        try {
+            return proxy.getFollowingList(loadMoreKey);
+        } catch (UnauthorizedException e1) {
+            proxy.refreshToken();
+            return proxy.getFollowingList(loadMoreKey);
+        }
+    }
+
+    public FollowerRep getFollowerList(FollowerRep.LoadMoreKeyBean loadMoreKey) throws IOException, NoLoginException {
+        try {
+            return proxy.getFollowerList(loadMoreKey);
+        } catch (UnauthorizedException e1) {
+            proxy.refreshToken();
+            return proxy.getFollowerList(loadMoreKey);
         }
     }
 
