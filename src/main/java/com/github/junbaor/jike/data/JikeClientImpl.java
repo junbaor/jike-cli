@@ -6,21 +6,25 @@ import com.github.junbaor.jike.exceptions.SmsCodeErrorException;
 import com.github.junbaor.jike.exceptions.UnauthorizedException;
 import com.github.junbaor.jike.model.*;
 import com.github.junbaor.jike.util.JsonUtils;
+import com.github.junbaor.jike.util.RequestUtils;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import okhttp3.logging.HttpLoggingInterceptor;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
 public class JikeClientImpl {
-
-    public static final JikeClientImpl INS = new JikeClientImpl();
 
     public static final String DEVICE_ID = "4653BFCE-9D54-471C-809C-422AC240DA7B";
     public static final String IDFV = "5C5FC6BB-F6E6-4689-BB5A-E88763186C55";
@@ -58,29 +62,31 @@ public class JikeClientImpl {
         return null;
     }
 
-    public PersonalUpdate personalUpdate() {
-        try {
-            String json = "{\"limit\":10,\"username\":\"" + Config.getUserName() + "\"}";
-            MediaType mediaType = MediaType.parse("application/json");
-            RequestBody body = RequestBody.create(mediaType, json);
-            Headers headers = getDefaultHeader();
-            Request request = new Request.Builder()
-                    .url("https://api.ruguoapp.com/1.0/personalUpdate/single")
-                    .method("POST", body)
-                    .headers(headers)
-                    .build();
-            Response response = client.newCall(request).execute();
-            if (response.code() == 401) {
-                throw new UnauthorizedException();
-            }
-            boolean success = response.code() == 200;
-            if (success) {
-                ResponseBody responseBody = response.body();
-                assert responseBody != null;
-                return JsonUtils.asObject(responseBody.string(), PersonalUpdate.class);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+    public PersonalUpdate single(String userName, PersonalUpdate.LoadMoreKeyBean loadMoreKeyBean) throws IOException {
+        Map<String, Object> map = new HashMap<>();
+        map.put("limit", 10);
+        map.put("username", StringUtils.defaultIfBlank(userName, Config.getUserName()));
+        if (loadMoreKeyBean != null) {
+            map.put("loadMoreKey", loadMoreKeyBean);
+        }
+        String json = JsonUtils.toJson(map);
+        MediaType mediaType = MediaType.parse("application/json");
+        RequestBody body = RequestBody.create(mediaType, json);
+        Headers headers = getDefaultHeader();
+        Request request = new Request.Builder()
+                .url("https://api.ruguoapp.com/1.0/personalUpdate/single")
+                .method("POST", body)
+                .headers(headers)
+                .build();
+        Response response = client.newCall(request).execute();
+        if (response.code() == 401) {
+            throw new UnauthorizedException();
+        }
+        boolean success = response.code() == 200;
+        if (success) {
+            ResponseBody responseBody = response.body();
+            assert responseBody != null;
+            return JsonUtils.asObject(responseBody.string(), PersonalUpdate.class);
         }
         return null;
     }
@@ -100,7 +106,9 @@ public class JikeClientImpl {
         if (success) {
             ResponseBody body = response.body();
             assert body != null;
-            return JsonUtils.asObject(body.string(), Profile.class);
+            Profile profile = JsonUtils.asObject(body.string(), Profile.class);
+            Config.setUserName(profile.getUser().getUsername());
+            return profile;
         }
         return null;
     }
@@ -191,10 +199,181 @@ public class JikeClientImpl {
                 log.info("登录成功");
                 log.info("accessToken:" + accessToken);
                 log.info("refreshToken:" + refreshToken);
+
+                profile(); // 获取个人信息, 为了补充配置文件中的 username
             }
         } else {
             throw new SmsCodeErrorException();
         }
+    }
+
+    public CreatePostsRep createPosts(String content) throws IOException {
+        Map<String, Object> map = new HashMap<>();
+        // https://cdn.jellow.site/FqavXkNAuPb-IVP5Nw6RdtPe2ZAH.jpg
+        map.put("pictureKeys", Collections.emptyList()); // "FqavXkNAuPb-IVP5Nw6RdtPe2ZAH.jpg"
+//        "coord": {
+//            "lng": "116.30330012748468",
+//                    "lat": "39.962664618300245",
+//                    "coordType": "wgs84"
+//        },
+        map.put("syncToPersonalUpdate", true);
+        map.put("content", content);
+
+        MediaType mediaType = MediaType.parse("application/json");
+        RequestBody body = RequestBody.create(mediaType, JsonUtils.toJson(map));
+        Request request = new Request.Builder()
+                .url("https://api.ruguoapp.com/1.0/originalPosts/create")
+                .method("POST", body)
+                .headers(getDefaultHeader())
+                .build();
+        Response response = client.newCall(request).execute();
+        if (response.code() == 401) {
+            throw new UnauthorizedException();
+        }
+        boolean success = response.code() == 200;
+        if (success) {
+            ResponseBody responseBody = response.body();
+            assert responseBody != null;
+            return JsonUtils.asObject(responseBody.string(), CreatePostsRep.class);
+        }
+        return null;
+    }
+
+    public String uploadToken(File file) throws IOException {
+        String md5 = DigestUtils.md5Hex(new FileInputStream(file));
+        OkHttpClient client = new OkHttpClient().newBuilder().build();
+        Request request = new Request.Builder()
+                .get()
+                .url("https://api.ruguoapp.com/1.0/upload/token?md5=" + md5)
+                .headers(getDefaultHeader())
+                .build();
+        Response response = client.newCall(request).execute();
+        if (response.code() == 401) {
+            throw new UnauthorizedException();
+        }
+        boolean success = response.code() == 200;
+        if (success) {
+            ResponseBody responseBody = response.body();
+            assert responseBody != null;
+            Map map = JsonUtils.asObject(responseBody.string(), Map.class);
+            return MapUtils.getString(map, "uptoken");
+        }
+        return null;
+    }
+
+    public boolean like(String id) throws IOException {
+        MediaType mediaType = MediaType.parse("application/json");
+        RequestBody body = RequestBody.create(mediaType, "{\"id\":\"" + id + "\"}");
+        Request request = new Request.Builder()
+                .url("https://api.ruguoapp.com/1.0/originalPosts/like")
+                .method("POST", body)
+                .headers(getDefaultHeader())
+                .build();
+        Response response = client.newCall(request).execute();
+        if (response.code() == 401) {
+            throw new UnauthorizedException();
+        }
+        return response.code() == 200;
+    }
+
+    public boolean unLike(String id) throws IOException {
+        MediaType mediaType = MediaType.parse("application/json");
+        RequestBody body = RequestBody.create(mediaType, "{\"id\":\"" + id + "\"}");
+        Request request = new Request.Builder()
+                .url("https://api.ruguoapp.com/1.0/originalPosts/unlike")
+                .method("POST", body)
+                .headers(getDefaultHeader())
+                .build();
+        Response response = client.newCall(request).execute();
+        if (response.code() == 401) {
+            throw new UnauthorizedException();
+        }
+        return response.code() == 200;
+    }
+
+    public AddCommentsRep addComments(String id, String content) throws IOException {
+        MediaType mediaType = MediaType.parse("application/json");
+        HashMap<String, Object> map = RequestUtils.map(
+                "targetId", id,
+                "content", content,
+                "pictureKeys", Collections.emptyList(),
+                "targetType", "ORIGINAL_POST",
+                "currentPageName", 14,
+                "sourcePageName", 50,
+                "force", false,
+                "syncToPersonalUpdates", false
+        );
+        String json = JsonUtils.toJson(map);
+        RequestBody body = RequestBody.create(mediaType, json);
+        Request request = new Request.Builder()
+                .url("https://api.ruguoapp.com/1.0/comments/add")
+                .method("POST", body)
+                .headers(getDefaultHeader())
+                .build();
+        Response response = client.newCall(request).execute();
+        if (response.code() == 401) {
+            throw new UnauthorizedException();
+        }
+        boolean success = response.code() == 200;
+        if (success) {
+            ResponseBody responseBody = response.body();
+            assert responseBody != null;
+            return JsonUtils.asObject(responseBody.string(), AddCommentsRep.class);
+        }
+        return null;
+    }
+
+    public FollowingRep getFollowingList(FollowingRep.LoadMoreKeyBean loadMoreKey) throws IOException {
+        String json = JsonUtils.toJson(RequestUtils.map(
+                "username", Config.getUserName(),
+                "limit", 10,
+                "loadMoreKey", loadMoreKey
+        ));
+        MediaType mediaType = MediaType.parse("application/json");
+        RequestBody body = RequestBody.create(mediaType, json);
+        Request request = new Request.Builder()
+                .url("https://api.ruguoapp.com/1.0/userRelation/getFollowingList")
+                .method("POST", body)
+                .headers(getDefaultHeader())
+                .build();
+        Response response = client.newCall(request).execute();
+        if (response.code() == 401) {
+            throw new UnauthorizedException();
+        }
+        boolean success = response.code() == 200;
+        if (success) {
+            ResponseBody responseBody = response.body();
+            assert responseBody != null;
+            String string = responseBody.string();
+            return JsonUtils.asObject(string, FollowingRep.class);
+        }
+        return null;
+    }
+
+    public FollowerRep getFollowerList(FollowerRep.LoadMoreKeyBean loadMoreKey) throws IOException {
+        String json = JsonUtils.toJson(RequestUtils.map(
+                "username", Config.getUserName(),
+                "limit", 20,
+                "loadMoreKey", loadMoreKey
+        ));
+        MediaType mediaType = MediaType.parse("application/json");
+        RequestBody body = RequestBody.create(mediaType, json);
+        Request request = new Request.Builder()
+                .url("https://api.ruguoapp.com/1.0/userRelation/getFollowerList")
+                .method("POST", body)
+                .headers(getDefaultHeader())
+                .build();
+        Response response = client.newCall(request).execute();
+        if (response.code() == 401) {
+            throw new UnauthorizedException();
+        }
+        boolean success = response.code() == 200;
+        if (success) {
+            ResponseBody responseBody = response.body();
+            assert responseBody != null;
+            return JsonUtils.asObject(responseBody.string(), FollowerRep.class);
+        }
+        return null;
     }
 
     @NotNull

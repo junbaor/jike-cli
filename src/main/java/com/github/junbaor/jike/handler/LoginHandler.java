@@ -12,7 +12,7 @@ public class LoginHandler {
     public void handler() throws SmsCodeErrorException, IOException {
         System.out.println("✨ 需要登录即刻账号");
         System.out.print("请输入手机国家区号,如+86:");
-        String areaCode = App.scanner.next();
+        String areaCode = App.scanner.nextLine();
         if (StringUtils.isBlank(areaCode)) {
             areaCode = "+86";
         }
@@ -20,7 +20,7 @@ public class LoginHandler {
             areaCode = "+" + areaCode;
         }
         System.out.print("请输入手机号:");
-        String mobile = App.scanner.next();
+        String mobile = App.scanner.nextLine();
         SendSms sendSms = App.jikeClient.sendSmsCode(areaCode, mobile);
         if (sendSms == null) {
             System.out.println("短信验证码发送失败,请重试");
@@ -29,7 +29,7 @@ public class LoginHandler {
         System.out.print("验证码已发送,");
         do {
             System.out.print("请输入手机短信验证码:");
-            String smsCode = App.scanner.next();
+            String smsCode = App.scanner.nextLine();
             try {
                 App.jikeClient.smsCodeLogin(areaCode, mobile, smsCode);
                 return;

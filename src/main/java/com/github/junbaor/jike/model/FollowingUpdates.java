@@ -32,6 +32,7 @@ public class FollowingUpdates {
         private List<?> urlsInText;
         private String status;
         private boolean isCommentForbidden;
+        private Boolean liked;
         private int likeCount;
         private int commentCount;
         private int repostCount;
