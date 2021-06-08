@@ -26,7 +26,7 @@ public class NewCmd implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        CreatePostsRep posts = App.jikeClient.createPosts(content + "\n\n来自 jike-cli");
+        CreatePostsRep posts = App.jikeClient.createPosts(content);
         if (posts != null) {
             System.out.println("✌️ 已发表");
         }
