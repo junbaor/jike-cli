@@ -1,10 +1,12 @@
 package com.github.junbaor.jike.data;
 
 import com.github.junbaor.jike.common.Config;
+import com.github.junbaor.jike.enums.ActionEnum;
 import com.github.junbaor.jike.exceptions.NoLoginException;
 import com.github.junbaor.jike.exceptions.SmsCodeErrorException;
 import com.github.junbaor.jike.exceptions.UnauthorizedException;
 import com.github.junbaor.jike.model.*;
+import com.github.junbaor.jike.model.nbdz2021.Nbdz2021Me;
 import com.github.junbaor.jike.util.JsonUtils;
 import com.github.junbaor.jike.util.RequestUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -376,6 +378,49 @@ public class JikeClientImpl {
         return null;
     }
 
+    public Nbdz2021Me getNbdz2021Me() throws IOException {
+        Request request = new Request.Builder()
+                .url("https://api.ruguoapp.com/1.0/nbdz2021/me")
+                .method("GET", null)
+                .headers(getDefaultHeader())
+                .build();
+
+        Response response = client.newCall(request).execute();
+        if (response.code() == 401) {
+            throw new UnauthorizedException();
+        }
+        boolean success = response.code() == 200;
+        if (success) {
+            ResponseBody responseBody = response.body();
+            assert responseBody != null;
+            return JsonUtils.asObject(responseBody.string(), Nbdz2021Me.class);
+        }
+        return null;
+    }
+
+    public String getNbdz2021Act(ActionEnum actionEnums) throws IOException {
+        MediaType mediaType = MediaType.parse("application/json;charset=utf-8");
+
+        RequestBody body = RequestBody.create(mediaType, "{\"count\":1,\"action\":\"" + actionEnums + "\"}");
+        Request request = new Request.Builder()
+                .url("https://api.ruguoapp.com/1.0/nbdz2021/act")
+                .method("POST", body)
+                .headers(getDefaultHeader())
+                .build();
+
+        Response response = client.newCall(request).execute();
+        if (response.code() == 401) {
+            throw new UnauthorizedException();
+        }
+        boolean success = response.code() == 200;
+        if (success) {
+            ResponseBody responseBody = response.body();
+            assert responseBody != null;
+            return responseBody.string();
+        }
+        return null;
+    }
+
     @NotNull
     private Headers getDefaultHeader() {
         Headers.Builder builder = new Headers.Builder();
@@ -383,7 +428,7 @@ public class JikeClientImpl {
         builder.add("Cookie", "abtest_info={}; abtest_info.sig=TpMSLxutJSIb6SX-RcpsEJ9rvBM");
         builder.add("king-card-status", "unavailable");
         builder.add("client-request-id", UUID.randomUUID().toString().toUpperCase());
-        builder.add("user-agent", "jike/7.17.0 (com.ruguoapp.jike; build:1901; iOS 14.7.0) Alamofire/5.4.3");
+        builder.add("user-agent", "jike/7.18.1 (com.ruguoapp.jike; build:1901; iOS 14.7.0) Alamofire/5.4.3");
         builder.add("x-jike-device-properties", "{\"idfv\":\"" + IDFV + "\"}");
         builder.add("app-buildno", "1901");
         builder.add("x-jike-device-id", DEVICE_ID);
@@ -398,8 +443,7 @@ public class JikeClientImpl {
         builder.add("model", "iPhone10,1");
         builder.add("app-permissions", "14");
         builder.add("accept", "*/*");
-        builder.add("accept", "*/*");
-        builder.add("app-version", "7.17.0");
+        builder.add("app-version", "7.18.1");
         builder.add("wificonnected", "true");
         builder.add("os-version", "Version 14.7 (Build 18G5033e)");
         return builder.build();

@@ -22,7 +22,8 @@ import java.util.concurrent.Callable;
                 MessageCmd.class,
                 FollowingCmd.class,
                 FollowerCmd.class,
-                NewCmd.class
+                NewCmd.class,
+                Nbdz2021Cmd.class
         },
         description = "即刻命令行客户端",
         versionProvider = VersionProvider.class

@@ -1,9 +1,11 @@
 package com.github.junbaor.jike.data;
 
+import com.github.junbaor.jike.enums.ActionEnum;
 import com.github.junbaor.jike.exceptions.NoLoginException;
 import com.github.junbaor.jike.exceptions.SmsCodeErrorException;
 import com.github.junbaor.jike.exceptions.UnauthorizedException;
 import com.github.junbaor.jike.model.*;
+import com.github.junbaor.jike.model.nbdz2021.Nbdz2021Me;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -111,6 +113,24 @@ public class JikeClient {
         } catch (UnauthorizedException e1) {
             proxy.refreshToken();
             return proxy.getFollowerList(loadMoreKey);
+        }
+    }
+
+    public Nbdz2021Me getNbdz2021Me() throws IOException, NoLoginException {
+        try {
+            return proxy.getNbdz2021Me();
+        } catch (UnauthorizedException e1) {
+            proxy.refreshToken();
+            return proxy.getNbdz2021Me();
+        }
+    }
+
+    public String getNbdz2021Act(ActionEnum actionEnums) throws IOException, NoLoginException {
+        try {
+            return proxy.getNbdz2021Act(actionEnums);
+        } catch (UnauthorizedException e1) {
+            proxy.refreshToken();
+            return proxy.getNbdz2021Act(actionEnums);
         }
     }
 
