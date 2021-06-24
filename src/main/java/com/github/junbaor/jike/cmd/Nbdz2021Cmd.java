@@ -32,7 +32,7 @@ public class Nbdz2021Cmd implements Callable<Integer> {
                     System.out.println("播种...");
                 } else if (i == 2) {
                     App.jikeClient.getNbdz2021Act(ActionEnum.WATER);
-                    System.out.println("浇水...");
+                    System.out.println("施肥...");
                 } else if (i == 3) {
                     App.jikeClient.getNbdz2021Act(ActionEnum.REAP);
                     System.out.println("收割...");
