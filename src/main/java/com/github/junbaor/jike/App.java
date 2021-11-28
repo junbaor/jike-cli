@@ -2,7 +2,8 @@ package com.github.junbaor.jike;
 
 import com.github.junbaor.jike.cmd.*;
 import com.github.junbaor.jike.common.AppConstant;
-import com.github.junbaor.jike.data.JikeClient;
+import com.github.junbaor.jike.data.JikeClientProxy;
+import com.github.junbaor.jike.data.JikeClientImpl;
 import com.github.junbaor.jike.exceptions.NoLoginException;
 import com.github.junbaor.jike.handler.TimeLineHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +31,7 @@ import java.util.concurrent.Callable;
 )
 public class App implements Callable<Integer> {
 
-    public static final JikeClient jikeClient = new JikeClient();
+    public static final JikeClientImpl jikeClient = JikeClientProxy.getProxy(new JikeClientImpl());
     public static final Scanner scanner = new Scanner(System.in);
 
     @CommandLine.Option(names = {"-v", "-version"}, versionHelp = true, description = "打印版本号")
