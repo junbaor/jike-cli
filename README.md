@@ -13,7 +13,17 @@ brew install junbaor/brew/jike-cli
 更新
 ```
 brew update && brew upgrade jike-cli
-``` 
+```
+卸载
+```
+brew uninstall jike-cli
+```
+清理残留文件(就好像它从来没来过)
+```
+brew untap junbaor/brew
+rm -rf ~/.jike
+brew 
+```
 
 #### 命令规划
 
