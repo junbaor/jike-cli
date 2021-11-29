@@ -1,5 +1,6 @@
 package com.github.junbaor.jike.cmd;
 
+import com.github.junbaor.jike.util.SystemUtils;
 import picocli.CommandLine;
 
 public class VersionProvider implements CommandLine.IVersionProvider {
@@ -15,9 +16,12 @@ public class VersionProvider implements CommandLine.IVersionProvider {
         javaInfo.append("VM name").append(": ").append(javaVmName).append(", ");
         javaInfo.append("runtime").append(": ").append(javaHome);
 
-        String jikeCliVersion = "v0.1.3";
+        String jikeCliVersion = SystemUtils.gitInfo().getProperty("git.build.version", "[unknown]");
+        String gitHash = SystemUtils.gitInfo().getProperty("git.commit.id.full", "[unknown]");
+
         return new String[]{
-                "jike-cli " + jikeCliVersion,
+                "jike-cli v" + jikeCliVersion,
+                "git commit: " + gitHash,
                 javaInfo.toString()
         };
     }
