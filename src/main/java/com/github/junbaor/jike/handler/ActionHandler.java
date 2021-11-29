@@ -5,7 +5,10 @@ import com.github.junbaor.jike.cmd.HomeCmd;
 import com.github.junbaor.jike.exceptions.NoLoginException;
 import com.github.junbaor.jike.model.AddCommentsRep;
 import com.github.junbaor.jike.model.FollowingUpdates;
+import com.github.junbaor.jike.util.StringUtils;
+import com.github.junbaor.jike.util.SystemUtils;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.IOException;
 import java.util.List;
@@ -81,4 +84,43 @@ public class ActionHandler {
             }
         }
     }
+
+    public static void showImages(String next, List<FollowingUpdates.DataBean> dataList) {
+        String[] params = next.trim().split(" ");
+        if (params.length != 2) {
+            System.out.println("输入错误, 请重新输入");
+        } else {
+            int index = Integer.parseInt(params[1]); // 序号
+            if (CollectionUtils.isEmpty(dataList) || dataList.size() < index) {
+                System.out.println("根据序号未匹配到动态");
+            } else {
+                FollowingUpdates.DataBean dataBean = dataList.get(index - 1);
+                if (CollectionUtils.isNotEmpty(dataBean.getPictures())) {
+                    for (FollowingUpdates.DataBean.PicturesBean picture : dataBean.getPictures()) {
+                        printPicture(picture);
+                    }
+                }
+            }
+        }
+    }
+
+    private static void printPicture(FollowingUpdates.DataBean.PicturesBean picture) {
+        String picUrl = picture.getPicUrl();
+        String extension = FilenameUtils.getExtension(picUrl);
+
+        /**
+         * cdn 路径不带后缀的图片终端无法显示, Content-Type 都是 image/heif, 需要利用七牛云转码
+         * 每月 0-20TB：免费, 20TB 以上：0.025 元/GB
+         * 瓦恁不要打我 ...
+         */
+        if (StringUtils.isBlank(extension)) {
+            picUrl += "?imageMogr2/format/jpg";
+        }
+
+        byte[] urlBytes = App.jikeClient.getUrlBytes(picUrl);
+        if (urlBytes != null) {
+            SystemUtils.printImage(urlBytes);
+        }
+    }
+
 }

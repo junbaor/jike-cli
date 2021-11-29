@@ -45,6 +45,7 @@ public class TimeLineHandler {
                 System.out.println("<" + StringUtils.pad("h", padSize, padStr) + "> 帮助");
                 System.out.println("<" + StringUtils.pad("q", padSize, padStr) + "> 退出");
                 System.out.println("<" + StringUtils.pad("g", padSize, padStr) + "> 查看作者动态");
+                System.out.println("<" + StringUtils.pad("i 序号", padSize, padStr) + "> 查看图片");
                 System.out.println("<" + StringUtils.pad("c 序号 评论内容", padSize, padStr) + "> 评论");
 //                System.out.println("<" + StringUtils.pad("f 序号", padSize, padStr) + "> 关注作者");
 //                System.out.println("<" + StringUtils.pad("u 序号", padSize, padStr) + "> 取关作者");
@@ -52,6 +53,8 @@ public class TimeLineHandler {
                 System.out.println("<" + StringUtils.pad("lj 序号", padSize, padStr) + "> 取消点赞");
             } else if (next.startsWith("g ")) { // 显示作者动态
                 ActionHandler.goAuthorHome(next, dataList);
+            } else if (next.startsWith("i ")) { // 查看图片
+                ActionHandler.showImages(next, dataList);
             } else if (next.startsWith("c ")) { // 评论 FIXME 正则匹配
                 ActionHandler.comment(next, dataList);
             } else if (next.startsWith("f ")) { // 关注
@@ -60,7 +63,7 @@ public class TimeLineHandler {
 
             } else if (next.startsWith("nb ")) { // 点赞
                 ActionHandler.like(next, dataList);
-            } else if (next.startsWith("lj ")) { // 点赞
+            } else if (next.startsWith("lj ")) { // 取消点赞
                 ActionHandler.unLike(next, dataList);
             } else {
                 System.out.println("无效命令");

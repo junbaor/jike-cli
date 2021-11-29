@@ -421,6 +421,22 @@ public class JikeClientImpl {
         return null;
     }
 
+    public byte[] getUrlBytes(String url) {
+        try {
+            Request request = new Request.Builder().get().url(url).build();
+            Response response = client.newCall(request).execute();
+            boolean success = response.code() == 200;
+            if (success) {
+                ResponseBody responseBody = response.body();
+                assert responseBody != null;
+                return responseBody.bytes();
+            }
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
     @NotNull
     private Headers getDefaultHeader() {
         Headers.Builder builder = new Headers.Builder();
