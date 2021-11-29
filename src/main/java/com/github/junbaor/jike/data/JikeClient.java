@@ -134,4 +134,8 @@ public class JikeClient {
         }
     }
 
+    public byte[] getUrlBytes(String url) {
+        return proxy.getUrlBytes(url);
+    }
+
 }
