@@ -113,7 +113,7 @@ public class ActionHandler {
          * 每月 0-20TB：免费, 20TB 以上：0.025 元/GB
          * 瓦恁不要打我 ...
          */
-        if (StringUtils.isBlank(extension)) {
+        if (StringUtils.isBlank(extension) && !picUrl.contains("imageMogr2")) {
             picUrl += "?imageMogr2/format/jpg";
         }
 
